@@ -1,76 +1,137 @@
-# ── Graph 1: Confusion Matrix ──
-fig, ax = plt.subplots(figsize=(6,5))
-ConfusionMatrixDisplay(confusion_matrix(y_test, y_pred),
-    display_labels=['Background','Signal']).plot(ax=ax, cmap='Blues')
-ax.set_title('Confusion Matrix — Random Forest', fontsize=14, fontweight='bold')
-plt.tight_layout()
-plt.savefig('results/1_confusion_matrix.png', dpi=150)
-plt.show()
+# 🔬 HIGGS Boson Detection — Random Forest Classifier
 
-<img width="593" height="453" alt="image" src="https://github.com/user-attachments/assets/64f1a090-87f2-45df-8d85-486e20e2deb8" />
+> **Machine Learning Classification Assignment**  
+> Dataset Size: ~7.5 GB | Model: Random Forest | Language: Python
 
-# ── Graph 2: ROC Curve ──
-fig, ax = plt.subplots(figsize=(7,5))
-ax.plot(fpr, tpr, color='#e63946', lw=2, label=f'AUC = {roc_auc:.4f}')
-ax.plot([0,1],[0,1], 'grey', linestyle='--')
-ax.set_xlabel('False Positive Rate'); ax.set_ylabel('True Positive Rate')
-ax.set_title('ROC Curve — Random Forest', fontsize=14, fontweight='bold')
-ax.legend(); ax.grid(alpha=0.3)
-plt.tight_layout()
-plt.savefig('results/2_roc_curve.png', dpi=150)
-plt.show()
+---
 
-<img width="690" height="490" alt="image" src="https://github.com/user-attachments/assets/adf95430-547c-4e1e-a5f5-8cae3470f141" />
+## 📌 Problem Statement
 
-# ── Graph 3: Feature Importances ──
-feat_names = df.drop(columns=['label']).columns.tolist()
-importances = model.feature_importances_
-indices = np.argsort(importances)[::-1][:15]
+Classify particle collision events as **Signal** (Higgs Boson produced) or **Background** (noise) using 28 physics-derived features from the HIGGS dataset published by UCI Machine Learning Repository.
 
-fig, ax = plt.subplots(figsize=(10,6))
-colors = plt.cm.viridis(np.linspace(0.3, 0.9, 15))
-ax.bar(range(15), importances[indices], color=colors)
-ax.set_xticks(range(15))
-ax.set_xticklabels([feat_names[i] for i in indices], rotation=45, ha='right', fontsize=9)
-ax.set_title('Top 15 Feature Importances', fontsize=14, fontweight='bold')
-ax.set_ylabel('Importance Score'); ax.grid(axis='y', alpha=0.3)
-plt.tight_layout()
-plt.savefig('results/3_feature_importances.png', dpi=150)
-plt.show()
+---
 
-<img width="989" height="590" alt="image" src="https://github.com/user-attachments/assets/5897da4f-8a75-4c18-931d-cfad76c9271d" />
+## 📦 Dataset
 
+| Property       | Details                                               |
+|----------------|-------------------------------------------------------|
+| Name           | HIGGS Dataset                                         |
+| Source         | [UCI ML Repository](https://archive.ics.uci.edu/ml/datasets/HIGGS) |
+| Size           | ~7.5 GB (uncompressed) / ~2.6 GB (compressed)         |
+| Rows           | 11,000,000                                            |
+| Features       | 28 physics features                                   |
+| Target         | Binary (0 = Background, 1 = Signal)                  |
 
-# ── Graph 4: Class Distribution ──
-fig, axes = plt.subplots(1, 2, figsize=(10,4))
-pd.Series(y_test).value_counts().sort_index().plot(
-    kind='bar', ax=axes[0], color=['#457b9d','#e63946'], rot=0)
-axes[0].set_title('Actual Classes', fontweight='bold')
-axes[0].set_xticklabels(['Background','Signal'])
+The dataset is **automatically downloaded** when you run `main.py`.
 
-pd.Series(y_pred).value_counts().sort_index().plot(
-    kind='bar', ax=axes[1], color=['#2a9d8f','#f4a261'], rot=0)
-axes[1].set_title('Predicted Classes', fontweight='bold')
-axes[1].set_xticklabels(['Background','Signal'])
+---
 
-plt.suptitle('Actual vs Predicted Distribution', fontsize=13, fontweight='bold')
-plt.tight_layout()
-plt.savefig('results/4_class_distribution.png', dpi=150)
-plt.show()
-<img width="989" height="396" alt="image" src="https://github.com/user-attachments/assets/b0f495c9-dfce-4b19-b526-5041685af5df" />
+## 🏗️ Project Structure
 
+```
+ml_classification_project/
+│
+├── main.py             # Full pipeline (download → preprocess → train → evaluate)
+├── requirements.txt    # Python dependencies
+├── README.md           # This file
+└── results/            # Auto-generated output graphs & metrics
+    ├── 1_confusion_matrix.png
+    ├── 2_roc_curve.png
+    ├── 3_feature_importances.png
+    ├── 4_class_distribution.png
+    ├── 5_probability_distribution.png
+    └── metrics_summary.txt
+```
 
-# ── Graph 5: Probability Distribution ──
-fig, ax = plt.subplots(figsize=(8,5))
-ax.hist(y_proba[y_test==0], bins=60, alpha=0.6, color='#457b9d', label='Background')
-ax.hist(y_proba[y_test==1], bins=60, alpha=0.6, color='#e63946', label='Signal')
-ax.set_xlabel('Predicted Probability'); ax.set_ylabel('Count')
-ax.set_title('Prediction Probability Distribution', fontsize=14, fontweight='bold')
-ax.legend(); ax.grid(alpha=0.3)
-plt.tight_layout()
-plt.savefig('results/5_probability_distribution.png', dpi=150)
-plt.show()
-print('✅ Graph 5 save ho gaya!')
-print('\n🎉 Saare 5 graphs ban gaye results/ folder mein!')
+---
 
-<img width="789" height="490" alt="image" src="https://github.com/user-attachments/assets/c747a55d-3a62-4567-8d7c-7c0cd2e50f8a" />
+## 🔄 Pipeline Steps
+
+```
+1. Download Dataset    →  Auto-downloads HIGGS.csv.gz (~2.6 GB) from UCI
+2. Read Dataset        →  Loads 500,000 rows with proper column names
+3. Preprocess          →  Null check, Train/Test split (80/20), StandardScaler
+4. Train Model         →  RandomForestClassifier (100 trees, max_depth=15)
+5. Evaluate & Plot     →  5 result graphs + metrics summary
+```
+
+---
+
+## ⚙️ How to Run
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/<your-username>/ml_classification_project.git
+cd ml_classification_project
+```
+
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the Pipeline
+```bash
+python main.py
+```
+
+> **Note:** The dataset (~2.6 GB compressed) will be downloaded automatically on first run. Make sure you have ~10 GB free disk space and a stable internet connection.
+
+---
+
+## 📊 Results
+
+### Confusion Matrix
+![Confusion Matrix](results/1_confusion_matrix.png)
+
+### ROC Curve
+![ROC Curve](results/2_roc_curve.png)
+
+### Feature Importances
+![Feature Importances](results/3_feature_importances.png)
+
+### Class Distribution
+![Class Distribution](results/4_class_distribution.png)
+
+### Probability Distribution
+![Probability Distribution](results/5_probability_distribution.png)
+
+---
+
+## 🧰 Tech Stack
+
+| Tool            | Version  |
+|-----------------|----------|
+| Python          | 3.9+     |
+| scikit-learn    | 1.3+     |
+| pandas          | 2.0+     |
+| numpy           | 1.24+    |
+| matplotlib      | 3.7+     |
+| seaborn         | 0.12+    |
+
+---
+
+## 📈 Model Configuration
+
+```python
+RandomForestClassifier(
+    n_estimators = 100,
+    max_depth    = 15,
+    n_jobs       = -1,       # Use all CPU cores
+    random_state = 42
+)
+```
+
+---
+
+## 👤 Author
+
+**[Your Full Name]**  
+Roll Number: [Your Roll Number]  
+Course: [Your Course Name]
+
+---
+
+## 📄 License
+
+This project is open-source and available under the [MIT License](LICENSE).

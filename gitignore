@@ -1,0 +1,20 @@
+# Dataset files (too large for GitHub)
+HIGGS.csv
+HIGGS.csv.gz
+*.csv
+*.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+env/
+
+# Results (optional: remove to include graphs in repo)
+# results/
+
+# OS
+.DS_Store
+Thumbs.db
