@@ -38,6 +38,9 @@ plt.tight_layout()
 plt.savefig('results/3_feature_importances.png', dpi=150)
 plt.show()
 
+<img width="989" height="590" alt="image" src="https://github.com/user-attachments/assets/5897da4f-8a75-4c18-931d-cfad76c9271d" />
+
+
 # ── Graph 4: Class Distribution ──
 fig, axes = plt.subplots(1, 2, figsize=(10,4))
 pd.Series(y_test).value_counts().sort_index().plot(
@@ -54,6 +57,8 @@ plt.suptitle('Actual vs Predicted Distribution', fontsize=13, fontweight='bold')
 plt.tight_layout()
 plt.savefig('results/4_class_distribution.png', dpi=150)
 plt.show()
+<img width="989" height="396" alt="image" src="https://github.com/user-attachments/assets/b0f495c9-dfce-4b19-b526-5041685af5df" />
+
 
 # ── Graph 5: Probability Distribution ──
 fig, ax = plt.subplots(figsize=(8,5))
